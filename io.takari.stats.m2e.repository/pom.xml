@@ -52,6 +52,39 @@
           </products>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>maven-upload-plugin</artifactId>
+        <version>0.0.1</version>
+        <executions>
+          <execution>
+            <id>publish-snapshot</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>upload-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+              <serverId>${serverIdInSettingsXml}</serverId>
+              <repositoryUrl>${repositoryUrl}</repositoryUrl>
+              <repositoryPath>${repositoryPath}</repositoryPath>
+            </configuration>
+          </execution>
+          <execution>
+            <id>publish-latest</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>upload-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+              <serverId>${serverIdInSettingsXml}</serverId>
+              <repositoryUrl>${repositoryUrl}</repositoryUrl>
+              <repositoryPath>${repositoryPathId}/${unqualifiedVersion}/N/LATEST</repositoryPath>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
