@@ -5,7 +5,7 @@
 
    <plugins>
       <plugin id="com.google.gson"/>
-      <plugin id="io.takari.stats.client.m2e"/>
+      <plugin id="io.takari.stats.m2e"/>
    </plugins>
 
 </product>

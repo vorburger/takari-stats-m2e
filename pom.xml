@@ -20,7 +20,7 @@
   </parent>
 
   <groupId>io.takari.stats</groupId>
-  <artifactId>io.takari.stats.m2e</artifactId>
+  <artifactId>takari-stats-m2e</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -46,8 +46,8 @@
   </build>
 
   <modules>
-    <module>io.takari.stats.client.m2e</module>
-    <module>io.takari.stats.client.m2e.tests</module>
-    <module>io.takari.stats.client.m2e.repository</module>
+    <module>io.takari.stats.m2e</module>
+    <module>io.takari.stats.m2e.tests</module>
+    <module>io.takari.stats.m2e.repository</module>
   </modules>
 </project>

@@ -1,4 +1,4 @@
-package io.takari.stats.client.m2e.internal;
+package io.takari.stats.m2e.internal;
 
 import io.tesla.aether.client.AetherClientAuthentication;
 import io.tesla.aether.client.AetherClientConfig;

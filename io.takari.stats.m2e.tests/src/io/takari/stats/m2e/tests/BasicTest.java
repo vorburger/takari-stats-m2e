@@ -1,6 +1,6 @@
-package io.takari.stats.client.m2e.tests;
+package io.takari.stats.m2e.tests;
 
-import io.takari.stats.client.m2e.internal.UsageStatsActivator;
+import io.takari.stats.m2e.internal.UsageStatsActivator;
 
 import java.util.List;
 

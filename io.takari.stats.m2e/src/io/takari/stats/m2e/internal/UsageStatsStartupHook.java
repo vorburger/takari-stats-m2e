@@ -9,7 +9,7 @@
  *      Takari, Inc. - initial API and implementation
  *******************************************************************************/
 
-package io.takari.stats.client.m2e.internal;
+package io.takari.stats.m2e.internal;
 
 import org.eclipse.m2e.core.internal.embedder.IMavenComponentContributor;
 

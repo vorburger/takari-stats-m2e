@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.m2e.core.mavenComponentContributors">
       <configurator
-            class="io.takari.stats.client.m2e.internal.UsageStatsStartupHook">
+            class="io.takari.stats.m2e.internal.UsageStatsStartupHook">
       </configurator>
    </extension>
 </plugin>

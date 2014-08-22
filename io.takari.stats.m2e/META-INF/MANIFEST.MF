@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: io.takari.stats.client.m2e;singleton:=true
+Bundle-SymbolicName: io.takari.stats.m2e;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
@@ -14,6 +14,6 @@ Require-Bundle: org.eclipse.m2e.core;bundle-version="1.5.0",
  org.eclipse.equinox.preferences,
  org.slf4j.api,
  org.eclipse.core.runtime
-Bundle-Activator: io.takari.stats.client.m2e.internal.UsageStatsActivator
+Bundle-Activator: io.takari.stats.m2e.internal.UsageStatsActivator
 Import-Package: com.google.gson;version="2.3.0"
-Export-Package: io.takari.stats.client.m2e.internal;x-friends:="io.takari.stats.client.m2e.tests"
+Export-Package: io.takari.stats.m2e.internal;x-friends:="io.takari.stats.m2e.tests"
