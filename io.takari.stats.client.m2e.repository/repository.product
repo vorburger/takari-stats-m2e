@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product uid="repository.product" version="0.1.0.qualifier" useFeatures="false" includeLaunchers="false">
+
+   <plugins>
+      <plugin id="com.google.gson"/>
+      <plugin id="io.takari.stats.client.m2e"/>
+   </plugins>
+
+</product>
