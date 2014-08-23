@@ -22,4 +22,20 @@
   <artifactId>io.takari.stats.m2e.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <configuration>
+            <systemProperties>
+              <eclipse.m2.stats.allow>true</eclipse.m2.stats.allow>
+            </systemProperties>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>

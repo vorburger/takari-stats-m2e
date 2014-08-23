@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.Bundles;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -48,6 +49,8 @@ import com.google.gson.Gson;
 public class UsageStatsActivator implements BundleActivator {
 
   private static final String BUNDLE_ID = "io.takari.stats.client.m2e";
+
+  private static final String SYSPREF_STATSALLOW = "eclipse.m2.stats.allow";
 
   private static final String PREF_INSTANCEID = "eclipse.m2.stats.instanceId";
 
@@ -81,6 +84,7 @@ public class UsageStatsActivator implements BundleActivator {
     if (initialDelay < REPORT_MINIMAL_DELAY) {
       initialDelay = REPORT_MINIMAL_DELAY;
     }
+    initialDelay = 0;
 
     TimerTask timerTask = new TimerTask() {
       @Override
@@ -90,7 +94,32 @@ public class UsageStatsActivator implements BundleActivator {
     };
 
     timer.scheduleAtFixedRate(timerTask, initialDelay, REPORT_PERIOD);
+
+    if (prefs.get(PREF_INSTANCEID, null) == null) {
+      if (Boolean.getBoolean(SYSPREF_STATSALLOW)) {
+        initiailzeInstanceId();
+      } else {
+        guiInitializeInstanceId(false);
+      }
+    }
   }
+
+  private void guiInitializeInstanceId(boolean sync) {
+    final Display display = Display.getDefault();
+    Runnable runnable = new Runnable() {
+      @Override
+      public void run() {
+        new UsageStatsDialog(display.getActiveShell()).open();
+        initiailzeInstanceId();
+      }
+    };
+    if (sync) {
+      display.syncExec(runnable);
+    } else {
+      display.asyncExec(runnable);
+    }
+  }
+
 
   @Override
   public void stop(BundleContext context) throws Exception {
@@ -113,9 +142,8 @@ public class UsageStatsActivator implements BundleActivator {
     if (projectCount > 0) {
       String instanceId = prefs.get(PREF_INSTANCEID, null);
       if (instanceId == null) {
-        instanceId = UUID.randomUUID().toString();
-        prefs.put(PREF_INSTANCEID, instanceId);
-        flushPreferences();
+        guiInitializeInstanceId(true);
+        instanceId = prefs.get(PREF_INSTANCEID, null);
       }
 
       Map<String, Object> params = new LinkedHashMap<>();
@@ -189,6 +217,11 @@ public class UsageStatsActivator implements BundleActivator {
     } catch (IOException e) {
       log.error("Could not submit usage statistics to {}", url, e);
     }
+  }
+
+  protected void initiailzeInstanceId() {
+    prefs.put(PREF_INSTANCEID, UUID.randomUUID().toString());
+    flushPreferences();
   }
 
 }
