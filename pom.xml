@@ -54,5 +54,7 @@
     <module>io.takari.stats.m2e</module>
     <module>io.takari.stats.m2e.tests</module>
     <module>io.takari.stats.m2e.repository</module>
+    <module>io.takari.stats.m2e.fragment15</module>
+    <module>io.takari.stats.m2e.fragment16</module>
   </modules>
 </project>

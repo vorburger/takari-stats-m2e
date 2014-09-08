@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: io.takari.stats.m2e.fragment15;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Localization: plugin
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.8
+Fragment-Host: io.takari.stats.m2e
+Bundle-Vendor: %Bundle-Vendor
+Import-Package: io.tesla.aether.client,
+ io.tesla.aether.okhttp

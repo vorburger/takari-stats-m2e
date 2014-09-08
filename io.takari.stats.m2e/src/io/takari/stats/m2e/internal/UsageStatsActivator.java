@@ -1,14 +1,5 @@
 package io.takari.stats.m2e.internal;
 
-import io.takari.aether.client.AetherClientAuthentication;
-import io.takari.aether.client.AetherClientConfig;
-import io.takari.aether.client.AetherClientProxy;
-import io.takari.aether.client.Response;
-import io.takari.aether.client.RetryableSource;
-import io.takari.aether.okhttp.OkHttpAetherClient;
-
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -63,9 +54,34 @@ public class UsageStatsActivator implements BundleActivator {
 
   private static final String REPORT_URL = "https://stats.takari.io/stats";
 
-  private static UsageStatsActivator instance;
+  private static final Logger log;
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private static final HttpClient HTTP;
+
+  static {
+    final Class<UsageStatsActivator> clazz = UsageStatsActivator.class;
+
+    log = LoggerFactory.getLogger(clazz);
+
+    HttpClient http = null;
+    try {
+      http = newHttpClient("io.takari.stats.m2e.internal.fragment16.HttpClient16");
+    } catch (LinkageError | ReflectiveOperationException e16) {
+      try {
+        http = newHttpClient("io.takari.stats.m2e.internal.fragment15.HttpClient15");
+      } catch (LinkageError | ReflectiveOperationException e15) {
+        log.error("Could not instantiate m2e 1.6 http connector", e16);
+        log.error("Could not instantiate m2e 1.5 http connector", e15);
+      }
+    }
+    HTTP = http;
+  }
+
+  private static HttpClient newHttpClient(String impl) throws ReflectiveOperationException {
+    return (HttpClient) UsageStatsActivator.class.getClassLoader().loadClass(impl).newInstance();
+  }
+
+  private static UsageStatsActivator instance;
 
   private Timer timer;
 
@@ -180,46 +196,22 @@ public class UsageStatsActivator implements BundleActivator {
   }
 
   private void post(String url, String body) {
-    log.info("Reporting usage stats url={}, body={}", url, body);
+    if (HTTP != null) {
+      log.info("Reporting usage stats url={}, body={}", url, body);
 
-    AetherClientConfig config = new AetherClientConfig();
-    config.setUserAgent(MavenPluginActivator.getUserAgent());
-    config.setConnectionTimeout(15 * 1000); // XXX
-    config.setRequestTimeout(60 * 1000); // XXX
-
-    ProxyInfo proxyInfo = null;
-    try {
-      proxyInfo = MavenPlugin.getMaven().getProxyInfo("https");
-    } catch (CoreException e) {
-      log.debug("Could not read http proxy configuration", e);
-    }
-    if (proxyInfo != null && !ProxyUtils.validateNonProxyHosts(proxyInfo, PathUtils.host(url))) {
-      AetherClientProxy proxy = new AetherClientProxy();
-      proxy.setHost(proxyInfo.getHost());
-      proxy.setPort(proxyInfo.getPort());
-      proxy.setAuthentication(new AetherClientAuthentication(proxyInfo.getUserName(), proxyInfo
-          .getPassword()));
-      config.setProxy(proxy);
-    }
-
-    try {
-      final byte[] bytes = body.getBytes("UTF-8");
-      Response response = new OkHttpAetherClient(config).put(url, new RetryableSource() {
-        @Override
-        public long length() {
-          return bytes.length;
-        }
-
-        @Override
-        public void copyTo(OutputStream os) throws IOException {
-          os.write(bytes);
-        }
-      });
-      if (response.getStatusCode() > 299) {
-        log.error("HTTP {}/{}", response.getStatusCode(), response.getStatusMessage());
+      ProxyInfo proxyInfo = null;
+      try {
+        proxyInfo = MavenPlugin.getMaven().getProxyInfo("https");
+      } catch (CoreException e) {
+        log.debug("Could not read http proxy configuration", e);
       }
-    } catch (IOException e) {
-      log.error("Could not submit usage statistics to {}", url, e);
+      if (proxyInfo != null && ProxyUtils.validateNonProxyHosts(proxyInfo, PathUtils.host(url))) {
+        proxyInfo = null;
+      }
+
+      HTTP.post(url, body, proxyInfo);
+    } else {
+      log.error("Could not report usage stats, see previous http connection instantiation error");
     }
   }
 
