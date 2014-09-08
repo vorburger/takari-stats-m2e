@@ -52,7 +52,9 @@ public class UsageStatsActivator implements BundleActivator {
 
   private static final long REPORT_PERIOD = TimeUnit.DAYS.toMillis(7);
 
-  private static final String REPORT_URL = "https://stats.takari.io/stats";
+  private static final String PROTOCOL = "http";
+
+  private static final String REPORT_URL = PROTOCOL + "://stats.takari.io/stats";
 
   private static final Logger log;
 
@@ -201,7 +203,7 @@ public class UsageStatsActivator implements BundleActivator {
 
       ProxyInfo proxyInfo = null;
       try {
-        proxyInfo = MavenPlugin.getMaven().getProxyInfo("https");
+        proxyInfo = MavenPlugin.getMaven().getProxyInfo(PROTOCOL);
       } catch (CoreException e) {
         log.debug("Could not read http proxy configuration", e);
       }
