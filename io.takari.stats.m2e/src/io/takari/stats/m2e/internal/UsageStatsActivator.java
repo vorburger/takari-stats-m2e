@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.Bundles;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -61,9 +62,7 @@ public class UsageStatsActivator implements BundleActivator {
   private static final HttpClient HTTP;
 
   static {
-    final Class<UsageStatsActivator> clazz = UsageStatsActivator.class;
-
-    log = LoggerFactory.getLogger(clazz);
+    log = LoggerFactory.getLogger(UsageStatsActivator.class);
 
     HttpClient http = null;
     try {
@@ -157,7 +156,8 @@ public class UsageStatsActivator implements BundleActivator {
     prefs.putLong(PREF_NEXTREPORT, System.currentTimeMillis() + REPORT_PERIOD);
     flushPreferences();
 
-    final int projectCount = MavenPlugin.getMavenProjectRegistry().getProjects().length;
+    final IMavenProjectFacade[] projects = MavenPlugin.getMavenProjectRegistry().getProjects();
+    final int projectCount = projects.length;
     if (projectCount > 0) {
       String instanceId = prefs.get(PREF_INSTANCEID, null);
       if (instanceId == null) {
@@ -175,6 +175,9 @@ public class UsageStatsActivator implements BundleActivator {
       params.put("os.name", System.getProperty("os.name", "unknown"));
       params.put("os.arch", System.getProperty("os.arch", "unknown"));
       params.put("os.version", System.getProperty("os.version", "unknown"));
+
+      // TODO maven plugins from org.apache.*, org.codehaus.* and io.takari.* groups
+      // TODO relevant eclipse plugins, activated since last report and implement an extension point
 
       post(url, toJson(params));
     }
