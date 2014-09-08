@@ -28,7 +28,7 @@ public class UsageStatsDialog extends TitleAreaDialog {
 
     StyledText styledText = new StyledText(container, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP);
     styledText
-        .setText("Takari, Inc. collects certain usage statistics. These usage statistics lets us  measure things like active usage of Takari tools, and lets us know things like which versions of the tools are in use and which tools are the most popular with developers. This limited data is examined on an aggreate basis and is maintained in accordance with Takari, Inc. Privacy Policy.\n");
+        .setText("Takari, Inc. collects certain usage statistics. These usage statistics lets us  measure things like active usage of Takari tools, and lets us know things like which versions of the tools are in use and which tools are the most popular with developers. This limited data is examined on an aggregate basis and is maintained in accordance with Takari, Inc. Privacy Policy.\n");
 
     return area;
   }
