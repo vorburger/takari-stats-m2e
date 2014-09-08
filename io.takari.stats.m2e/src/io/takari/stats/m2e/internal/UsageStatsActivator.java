@@ -1,10 +1,11 @@
 package io.takari.stats.m2e.internal;
 
-import io.tesla.aether.client.AetherClientAuthentication;
-import io.tesla.aether.client.AetherClientConfig;
-import io.tesla.aether.client.AetherClientProxy;
-import io.tesla.aether.client.RetryableSource;
-import io.tesla.aether.okhttp.OkHttpAetherClient;
+import io.takari.aether.client.AetherClientAuthentication;
+import io.takari.aether.client.AetherClientConfig;
+import io.takari.aether.client.AetherClientProxy;
+import io.takari.aether.client.Response;
+import io.takari.aether.client.RetryableSource;
+import io.takari.aether.okhttp.OkHttpAetherClient;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -203,7 +204,7 @@ public class UsageStatsActivator implements BundleActivator {
 
     try {
       final byte[] bytes = body.getBytes("UTF-8");
-      new OkHttpAetherClient(config).put(url, new RetryableSource() {
+      Response response = new OkHttpAetherClient(config).put(url, new RetryableSource() {
         @Override
         public long length() {
           return bytes.length;
@@ -214,6 +215,9 @@ public class UsageStatsActivator implements BundleActivator {
           os.write(bytes);
         }
       });
+      if (response.getStatusCode() > 299) {
+        log.error("HTTP {}/{}", response.getStatusCode(), response.getStatusMessage());
+      }
     } catch (IOException e) {
       log.error("Could not submit usage statistics to {}", url, e);
     }
