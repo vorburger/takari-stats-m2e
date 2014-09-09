@@ -25,6 +25,7 @@
   <packaging>pom</packaging>
 
   <properties>
+    <tychoVersion>0.21.0</tychoVersion>
     <repositoryUrl>http://repository.takari.io:8081/nexus/service/local/repositories/m2e.extras/content-compressed/</repositoryUrl>
     <repositoryPathId>takari-stats-m2e</repositoryPathId>
   </properties>
@@ -52,9 +53,10 @@
 
   <modules>
     <module>io.takari.stats.m2e</module>
-    <module>io.takari.stats.m2e.tests</module>
-    <module>io.takari.stats.m2e.repository</module>
     <module>io.takari.stats.m2e.fragment15</module>
     <module>io.takari.stats.m2e.fragment16</module>
+    <module>io.takari.stats.m2e.feature</module>
+    <module>io.takari.stats.m2e.tests</module>
+    <module>io.takari.stats.m2e.repository</module>
   </modules>
 </project>
