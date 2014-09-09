@@ -43,6 +43,7 @@ public class UsageStatsActivator implements BundleActivator {
 
   private static final String BUNDLE_ID = "io.takari.stats.client.m2e";
 
+  /** allow usage statistics collection to suppress info popup */
   private static final String SYSPREF_STATSALLOW = "eclipse.m2.stats.allow";
 
   private static final String PREF_INSTANCEID = "eclipse.m2.stats.instanceId";
@@ -95,49 +96,47 @@ public class UsageStatsActivator implements BundleActivator {
     instance = this;
     bundle = context.getBundle();
 
-    // daemon timer won't prevent JVM from shutting down.
-    timer = new Timer("Takari usage stats reporter", true);
+    if (prefs.get(PREF_INSTANCEID, null) == null) {
+      initializeWorkspace();
+
+      if (!Boolean.getBoolean(SYSPREF_STATSALLOW)) {
+        // display info popup if not explicitly allowed to collect usage statistics
+        final Display display = Display.getDefault();
+        Runnable runnable = new Runnable() {
+          @Override
+          public void run() {
+            new UsageStatsDialog(display.getActiveShell()).open();
+          }
+        };
+        display.asyncExec(runnable);
+      }
+    }
 
     long initialDelay = prefs.getLong(PREF_NEXTREPORT, 0) - System.currentTimeMillis();
     if (initialDelay < REPORT_MINIMAL_DELAY) {
       initialDelay = REPORT_MINIMAL_DELAY;
     }
-    initialDelay = 0;
 
-    TimerTask timerTask = new TimerTask() {
+    final TimerTask timerTask = new TimerTask() {
       @Override
       public void run() {
         reportUsageStats(REPORT_URL);
       }
     };
 
+    // daemon timer won't prevent JVM from shutting down.
+    timer = new Timer("Takari usage stats reporter", true);
     timer.scheduleAtFixedRate(timerTask, initialDelay, REPORT_PERIOD);
-
-    if (prefs.get(PREF_INSTANCEID, null) == null) {
-      if (Boolean.getBoolean(SYSPREF_STATSALLOW)) {
-        initiailzeInstanceId();
-      } else {
-        guiInitializeInstanceId(false);
-      }
-    }
   }
 
-  private void guiInitializeInstanceId(boolean sync) {
-    final Display display = Display.getDefault();
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        new UsageStatsDialog(display.getActiveShell()).open();
-        initiailzeInstanceId();
-      }
-    };
-    if (sync) {
-      display.syncExec(runnable);
-    } else {
-      display.asyncExec(runnable);
-    }
+  /**
+   * initialize workspace-uuid and next report time
+   */
+  protected void initializeWorkspace() {
+    prefs.put(PREF_INSTANCEID, UUID.randomUUID().toString());
+    prefs.putLong(PREF_NEXTREPORT, System.currentTimeMillis() + REPORT_PERIOD);
+    flushPreferences();
   }
-
 
   @Override
   public void stop(BundleContext context) throws Exception {
@@ -152,6 +151,12 @@ public class UsageStatsActivator implements BundleActivator {
   }
 
   public void reportUsageStats(String url) {
+    final String instanceId = prefs.get(PREF_INSTANCEID, null);
+    if (instanceId == null) {
+      log.error("Could not report usage stats, workspace UUID is not initialized");
+      return;
+    }
+
     // update next report time regardless if we report or not
     prefs.putLong(PREF_NEXTREPORT, System.currentTimeMillis() + REPORT_PERIOD);
     flushPreferences();
@@ -159,12 +164,6 @@ public class UsageStatsActivator implements BundleActivator {
     final IMavenProjectFacade[] projects = MavenPlugin.getMavenProjectRegistry().getProjects();
     final int projectCount = projects.length;
     if (projectCount > 0) {
-      String instanceId = prefs.get(PREF_INSTANCEID, null);
-      if (instanceId == null) {
-        guiInitializeInstanceId(true);
-        instanceId = prefs.get(PREF_INSTANCEID, null);
-      }
-
       Map<String, Object> params = new LinkedHashMap<>();
       params.put("workspaceUUID", instanceId);
       params.put("projectCount", projectCount);
@@ -218,11 +217,6 @@ public class UsageStatsActivator implements BundleActivator {
     } else {
       log.error("Could not report usage stats, see previous http connection instantiation error");
     }
-  }
-
-  protected void initiailzeInstanceId() {
-    prefs.put(PREF_INSTANCEID, UUID.randomUUID().toString());
-    flushPreferences();
   }
 
 }
