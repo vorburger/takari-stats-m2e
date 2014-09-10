@@ -1,7 +1,12 @@
 package io.takari.stats.m2e.internal;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -14,8 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.Bundles;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Bundle;
@@ -38,7 +41,6 @@ import com.google.gson.Gson;
  * 
  * @see UsageStatsStartupHook
  */
-@SuppressWarnings("restriction")
 public class UsageStatsActivator implements BundleActivator {
 
   private static final String BUNDLE_ID = "io.takari.stats.client.m2e";
@@ -57,6 +59,12 @@ public class UsageStatsActivator implements BundleActivator {
   private static final String PROTOCOL = "http";
 
   private static final String REPORT_URL = PROTOCOL + "://stats.takari.io/stats";
+
+  /**
+   * Presence of this bundle entry makes bundle symbolic name and version appear in the usage
+   * report. Only active bundles are reported however.
+   */
+  public static final String MAGIC_BUNDLE_ENTRY = ".takaristats";
 
   private static final Logger log;
 
@@ -83,18 +91,27 @@ public class UsageStatsActivator implements BundleActivator {
     return (HttpClient) UsageStatsActivator.class.getClassLoader().loadClass(impl).newInstance();
   }
 
+  private static final Set<String> KNOWN_BUNDLES;
+
+  static {
+    Set<String> knownBundles = new HashSet<>();
+    knownBundles.add("org.eclipse.osgi");
+    knownBundles.add("org.eclipse.m2e.core");
+    KNOWN_BUNDLES = Collections.unmodifiableSet(knownBundles);
+  }
+
   private static UsageStatsActivator instance;
 
   private Timer timer;
 
   private IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(BUNDLE_ID);
 
-  private Bundle bundle;
+  private BundleContext context;
 
   @Override
   public void start(BundleContext context) throws Exception {
     instance = this;
-    bundle = context.getBundle();
+    this.context = context;
 
     if (prefs.get(PREF_INSTANCEID, null) == null) {
       initializeWorkspace();
@@ -116,6 +133,7 @@ public class UsageStatsActivator implements BundleActivator {
     if (initialDelay < REPORT_MINIMAL_DELAY) {
       initialDelay = REPORT_MINIMAL_DELAY;
     }
+    // initialDelay = 0;
 
     final TimerTask timerTask = new TimerTask() {
       @Override
@@ -142,7 +160,7 @@ public class UsageStatsActivator implements BundleActivator {
   public void stop(BundleContext context) throws Exception {
     timer.cancel();
     timer = null;
-    bundle = null;
+    context = null;
     instance = null;
   }
 
@@ -167,16 +185,12 @@ public class UsageStatsActivator implements BundleActivator {
       Map<String, Object> params = new LinkedHashMap<>();
       params.put("workspaceUUID", instanceId);
       params.put("projectCount", projectCount);
-      params.put("m2e.version", MavenPluginActivator.getQualifiedVersion());
-      params.put("equinox.version", getEquinoxVersion());
       params.put("java.version", System.getProperty("java.version", "unknown"));
       params.put("java.vendor", System.getProperty("java.vendor", "unknown"));
       params.put("os.name", System.getProperty("os.name", "unknown"));
       params.put("os.arch", System.getProperty("os.arch", "unknown"));
       params.put("os.version", System.getProperty("os.version", "unknown"));
-
-      // TODO maven plugins from org.apache.*, org.codehaus.* and io.takari.* groups
-      // TODO relevant eclipse plugins, activated since last report and implement an extension point
+      params.put("bundles", getBundles());
 
       post(url, toJson(params));
     }
@@ -186,9 +200,23 @@ public class UsageStatsActivator implements BundleActivator {
     return new Gson().toJson(data);
   }
 
-  protected String getEquinoxVersion() {
-    Bundle equinox = Bundles.findDependencyBundle(bundle, "org.eclipse.osgi");
-    return equinox.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+  private List<Map<String, String>> getBundles() {
+    // TODO ideally, report all plugins activated at least once since previous report
+    List<Map<String, String>> bundles = new ArrayList<>();
+    for (Bundle bundle : context.getBundles()) {
+      if ((bundle.getState() & Bundle.ACTIVE) > 0) {
+        String bundleId = bundle.getSymbolicName();
+        if (KNOWN_BUNDLES.contains(bundleId) || isReportingRequested(bundle)) {
+          String bundleVersion = bundle.getVersion().toString();
+          bundles.add(Collections.singletonMap(bundleId, bundleVersion));
+        }
+      }
+    }
+    return bundles;
+  }
+
+  private boolean isReportingRequested(Bundle bundle) {
+    return bundle.getEntry(".takaristats") != null;
   }
 
   void flushPreferences() {
