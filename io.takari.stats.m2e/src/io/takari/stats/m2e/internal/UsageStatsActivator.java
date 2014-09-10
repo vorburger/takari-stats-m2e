@@ -43,7 +43,7 @@ public class UsageStatsActivator implements BundleActivator {
 
   private static final String BUNDLE_ID = "io.takari.stats.client.m2e";
 
-  /** allow usage statistics collection to suppress info popup */
+  /** explicitly allows usage statistics collection (in other words, suppresses info popup) */
   private static final String SYSPREF_STATSALLOW = "eclipse.m2.stats.allow";
 
   private static final String PREF_INSTANCEID = "eclipse.m2.stats.instanceId";
