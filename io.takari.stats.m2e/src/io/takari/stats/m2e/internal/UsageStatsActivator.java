@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +21,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -191,6 +195,7 @@ public class UsageStatsActivator implements BundleActivator {
       params.put("os.arch", System.getProperty("os.arch", "unknown"));
       params.put("os.version", System.getProperty("os.version", "unknown"));
       params.put("bundles", getBundles());
+      params.put("mavenPlugins", getMavenPlugins(projects));
 
       post(url, toJson(params));
     }
@@ -213,6 +218,46 @@ public class UsageStatsActivator implements BundleActivator {
       }
     }
     return bundles;
+  }
+
+  private Map<String, Set<String>> getMavenPlugins(IMavenProjectFacade[] projects) {
+    Map<String, Set<String>> mavenPlugins = new TreeMap<>();
+    for (IMavenProjectFacade project : projects) {
+      for (Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>> entry : project
+          .getMojoExecutionMapping().entrySet()) {
+        if (!isKnownMavenPluginGroupId(entry.getKey())) {
+          continue;
+        }
+        String mojoKey = toString(entry.getKey());
+        Set<String> mojoMappings = mavenPlugins.get(mojoKey);
+        if (mojoMappings == null) {
+          mojoMappings = new TreeSet<>();
+          mavenPlugins.put(mojoKey, mojoMappings);
+        }
+        for (IPluginExecutionMetadata mapping : entry.getValue()) {
+          mojoMappings.add(mapping.getAction().toString());
+        }
+      }
+    }
+    return mavenPlugins;
+  }
+
+  private boolean isKnownMavenPluginGroupId(MojoExecutionKey key) {
+    String groupId = key.getGroupId();
+    return groupId.startsWith("org.apache") || groupId.startsWith("org.codehaus")
+        || groupId.startsWith("io.takari");
+  }
+
+  private String toString(MojoExecutionKey key) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(key.getGroupId());
+    sb.append(':');
+    sb.append(key.getArtifactId());
+    sb.append(':');
+    sb.append(key.getVersion());
+    sb.append(':');
+    sb.append(key.getGoal());
+    return sb.toString();
   }
 
   private boolean isReportingRequested(Bundle bundle) {
