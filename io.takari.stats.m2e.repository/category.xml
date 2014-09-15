@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="io.takari.stats.m2e.feature_0.0.0.qualifier.jar" id="io.takari.stats.m2e.feature" version="0.0.0">
+      <category name="io.takari.m2e.team"/>
+   </feature>
+   <category-def name="io.takari.m2e.team" label="Takari TEAM"/>
+</site>
