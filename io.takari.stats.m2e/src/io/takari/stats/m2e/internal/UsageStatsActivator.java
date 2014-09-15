@@ -295,4 +295,8 @@ public class UsageStatsActivator implements BundleActivator {
     }
   }
 
+  public static String getId() {
+    Bundle bundle = instance.context.getBundle();
+    return bundle.getSymbolicName() + "_" + bundle.getVersion().toString();
+  }
 }
