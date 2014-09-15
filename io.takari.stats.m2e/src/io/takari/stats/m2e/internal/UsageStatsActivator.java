@@ -137,7 +137,7 @@ public class UsageStatsActivator implements BundleActivator {
     if (initialDelay < REPORT_MINIMAL_DELAY) {
       initialDelay = REPORT_MINIMAL_DELAY;
     }
-    // initialDelay = 0;
+    initialDelay = 0;
 
     final TimerTask timerTask = new TimerTask() {
       @Override
@@ -187,13 +187,14 @@ public class UsageStatsActivator implements BundleActivator {
     final int projectCount = projects.length;
     if (projectCount > 0) {
       Map<String, Object> params = new LinkedHashMap<>();
-      params.put("workspaceUUID", instanceId);
-      params.put("projectCount", projectCount);
       params.put("java.version", System.getProperty("java.version", "unknown"));
       params.put("java.vendor", System.getProperty("java.vendor", "unknown"));
       params.put("os.name", System.getProperty("os.name", "unknown"));
       params.put("os.arch", System.getProperty("os.arch", "unknown"));
       params.put("os.version", System.getProperty("os.version", "unknown"));
+      params.put("eclipse.product", System.getProperty("eclipse.product", "unknown"));
+      params.put("eclipse.buildId", System.getProperty("eclipse.buildId", "unknown"));
+      params.put("projectCount", projectCount);
       params.put("bundles", getBundles());
       params.put("mavenPlugins", getMavenPlugins(projects));
 
@@ -212,8 +213,10 @@ public class UsageStatsActivator implements BundleActivator {
       if ((bundle.getState() & Bundle.ACTIVE) > 0) {
         String bundleId = bundle.getSymbolicName();
         if (KNOWN_BUNDLES.contains(bundleId) || isReportingRequested(bundle)) {
-          String bundleVersion = bundle.getVersion().toString();
-          bundles.add(Collections.singletonMap(bundleId, bundleVersion));
+          Map<String, String> info = new LinkedHashMap<String, String>();
+          info.put("symbolicName", bundleId);
+          info.put("version", bundle.getVersion().toString());
+          bundles.add(info);
         }
       }
     }
