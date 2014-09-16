@@ -101,6 +101,7 @@ public class UsageStatsActivator implements BundleActivator {
     Set<String> knownBundles = new HashSet<>();
     knownBundles.add("org.eclipse.osgi");
     knownBundles.add("org.eclipse.m2e.core");
+    knownBundles.add("io.takari.stats.m2e");
     KNOWN_BUNDLES = Collections.unmodifiableSet(knownBundles);
   }
 
