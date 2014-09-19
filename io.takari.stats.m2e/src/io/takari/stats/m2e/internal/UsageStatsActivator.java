@@ -118,10 +118,20 @@ public class UsageStatsActivator implements BundleActivator {
     instance = this;
     this.context = context;
 
+    boolean forceAllow = Boolean.getBoolean(SYSPREF_STATSALLOW);
+
+    if (!forceAllow) {
+      String applicationId = System.getProperty("eclipse.application");
+      if ("org.eclipse.pde.junit.runtime.uitestapplication".equals(applicationId)) {
+        // this is PDE JUnit test launcher, no point collecting usage statistics
+        return;
+      }
+    }
+
     if (prefs.get(PREF_INSTANCEID, null) == null) {
       initializeWorkspace();
 
-      if (!Boolean.getBoolean(SYSPREF_STATSALLOW)) {
+      if (!forceAllow) {
         // display info popup if not explicitly allowed to collect usage statistics
         final Display display = Display.getDefault();
         Runnable runnable = new Runnable() {
