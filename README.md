@@ -14,7 +14,7 @@
 * org.eclipse.m2e.core
 * Bundles that have '/.takaristats' marker entry
 
-# What Maven pliyins are included in the report
+# What Maven pligins are included in the report
 
 Maven plugins that have the following groupId prefixes are included in the 
 report
@@ -23,7 +23,7 @@ report
 * org.codehaus*
 * io.takari*
 
-# How do we report usage statistics
+# How do we upload usage statistics
 
 Each active Eclipse workspace will upload statistics to Takari.io server one
 time every 7 days. This is done with a single HTTP PUT request, where the body
