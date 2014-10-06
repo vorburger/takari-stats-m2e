@@ -41,7 +41,7 @@ public class UsageStatsDialog extends TitleAreaDialog {
 
     final IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
 
-    Link link = new Link(container, SWT.NONE);
+    Link link = new Link(container, SWT.WRAP | SWT.NO_FOCUS);
     link.setText("Takari, Inc. collects certain usage statistics. These usage statistics lets us  measure things like active usage of Takari tools, and lets us know things like which versions of the tools are in use and which tools are the most popular with developers. This limited data is examined on an aggregate basis and is maintained in accordance with Takari, Inc. Privacy Policy. \n\n<a href=\"https://github.com/takari/takari-stats-m2e\">Github project page</a> provides information about data we collect.");
     link.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -59,7 +59,7 @@ public class UsageStatsDialog extends TitleAreaDialog {
 
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
-    createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+    createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true).setFocus();
   }
 
   @Override
