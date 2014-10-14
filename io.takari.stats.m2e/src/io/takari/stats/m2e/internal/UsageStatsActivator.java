@@ -1,9 +1,7 @@
 /**
- * Copyright (c) 2014 Takari, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2014 Takari, Inc. All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0 which accompanies this
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package io.takari.stats.m2e.internal;
 
@@ -155,7 +153,9 @@ public class UsageStatsActivator implements BundleActivator {
     if (initialDelay < REPORT_MINIMAL_DELAY) {
       initialDelay = REPORT_MINIMAL_DELAY;
     }
-    initialDelay = 0;
+
+    // this is meant for debugging purposes only, do not commit unless commented out.
+    // initialDelay = 0;
 
     final TimerTask timerTask = new TimerTask() {
       @Override
