@@ -67,7 +67,7 @@ public class UsageStatsActivator implements BundleActivator {
 
   private static final long REPORT_PERIOD = TimeUnit.DAYS.toMillis(7);
 
-  private static final String PROTOCOL = "http";
+  private static final String PROTOCOL = "https";
 
   private static final String REPORT_URL = PROTOCOL + "://stats.takari.io/stats";
 
