@@ -10,7 +10,7 @@
 -->
 <feature
       id="io.takari.stats.m2e.feature"
-      label="Tatari Usage Statistics Reporter"
+      label="Takari Usage Statistics Reporter"
       version="0.1.0.qualifier"
       provider-name="Takari, Inc.">
 
