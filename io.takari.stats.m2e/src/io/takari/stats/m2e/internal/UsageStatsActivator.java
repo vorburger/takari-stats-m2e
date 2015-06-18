@@ -282,7 +282,7 @@ public class UsageStatsActivator implements BundleActivator {
   }
 
   private boolean isReportingRequested(Bundle bundle) {
-    return bundle.getEntry(".takaristats") != null;
+    return bundle.getEntry(MAGIC_BUNDLE_ENTRY) != null;
   }
 
   void flushPreferences() {
