@@ -30,3 +30,7 @@ time every 7 days. This is done with a single HTTP PUT request, where the body
 is JSON encoded usage statistics data.
 
 Usage report is not uploaded if there are no m2e projects in the workspace.
+
+# How to disable the UI prompt asking for permission to upload
+
+Add "-Declipse.m2.stats.allow=true" to eclipse.ini.
